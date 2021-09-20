@@ -7,7 +7,7 @@ import SDLKit
 // swiftlint:disable prefixed_toplevel_constant
 
 // initialize the SDL library with video and audio
-if !SDL_Init(subsystems: [.video, .audio]) {
+if !SDL_Init(subsystems: [.video, .audio, .gameController]) {
     fatalError("could not init video/audio - reason: \(String(cString: SDL_GetError()))")
 }
 
@@ -76,6 +76,15 @@ func printHelp() {
 var keysDown = Set<Int32>()
 // closure to be used for checking keys down within systems
 let isKeyDown: (Int32) -> Bool = { keysDown.contains($0) }
+// map controller D-pad buttons to arrow keys.
+extension SDL_GameControllerButton : Hashable {}
+let dpadMap : [SDL_GameControllerButton : UInt32] = [
+    SDL_CONTROLLER_BUTTON_DPAD_UP : SDLK_UP.rawValue,
+    SDL_CONTROLLER_BUTTON_DPAD_DOWN : SDLK_DOWN.rawValue,
+    SDL_CONTROLLER_BUTTON_DPAD_LEFT : SDLK_LEFT.rawValue,
+    SDL_CONTROLLER_BUTTON_DPAD_RIGHT : SDLK_RIGHT.rawValue,
+    SDL_CONTROLLER_BUTTON_A : SDLK_SPACE.rawValue
+]
 
 // handle nexus events to keep track of what components are added to and removed from
 // entities in order to let systems know about it and react accordingly
@@ -231,6 +240,15 @@ while quit == false {
         case SDL_WINDOWEVENT where event.windowEvent == SDL_WINDOWEVENT_SIZE_CHANGED:
             width = Int32(event.window.data1)
             height = Int32(event.window.data2)
+
+        case SDL_CONTROLLERBUTTONDOWN:
+            if let key = dpadMap[event.controllerButton] {
+                keysDown.insert(Int32(key))
+            }
+        case SDL_CONTROLLERBUTTONUP:
+            if let key = dpadMap[event.controllerButton] {
+                keysDown.remove(Int32(key))
+            }
 
         case SDL_KEYDOWN:
             keysDown.insert(event.key.keysym.sym)
