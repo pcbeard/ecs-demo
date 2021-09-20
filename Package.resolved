@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/fireblade-engine/ecs.git",
         "state": {
           "branch": null,
-          "revision": "fd57037a6df5aa7fb8070d6af105650fb84c340c",
-          "version": "0.17.5"
+          "revision": "c997e078178113ff20e733942b81dea341c84f3d",
+          "version": "0.17.4"
         }
       },
       {
@@ -15,7 +15,7 @@
         "repositoryURL": "git@github.com:pcbeard/math.git",
         "state": {
           "branch": "Windows",
-          "revision": "38bec8aec12856ba897d9fa0ac44b912ba016ce3",
+          "revision": "67a4ed953cc20bca3d7f5dca7f08dfc03fa71fa2",
           "version": null
         }
       },
@@ -23,8 +23,8 @@
         "package": "SDL2",
         "repositoryURL": "git@github.com:pcbeard/SwiftSDL2.git",
         "state": {
-          "branch": "vcpkg-sdl",
-          "revision": "374273aec55078ba900cae2778a1e35925746c6c",
+          "branch": "SDL_image",
+          "revision": "55f6bf656e5715ba9373dda1d7c47c7adec54c49",
           "version": null
         }
       }

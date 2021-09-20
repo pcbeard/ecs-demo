@@ -12,7 +12,7 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-         .package(name: "SDL2", url: "git@github.com:pcbeard/SwiftSDL2.git", .branch("vcpkg-sdl")),
+        .package(name: "SDL2", url: "git@github.com:pcbeard/SwiftSDL2.git", .branch("SDL_image")),
         .package(name: "FirebladeECS", url: "https://github.com/fireblade-engine/ecs.git", from: "0.17.4"),
         .package(name: "FirebladeMath", url: "git@github.com:pcbeard/math.git", .branch("Windows"))
     ],
