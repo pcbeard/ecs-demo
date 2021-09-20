@@ -85,6 +85,8 @@ let dpadMap : [SDL_GameControllerButton : UInt32] = [
     SDL_CONTROLLER_BUTTON_DPAD_RIGHT : SDLK_RIGHT.rawValue,
     SDL_CONTROLLER_BUTTON_A : SDLK_SPACE.rawValue
 ]
+// keep track of attached game controllers.
+var gameControllers : [SDL_JoystickID : SDL_GameController] = [:]
 
 // handle nexus events to keep track of what components are added to and removed from
 // entities in order to let systems know about it and react accordingly
@@ -240,6 +242,23 @@ while quit == false {
         case SDL_WINDOWEVENT where event.windowEvent == SDL_WINDOWEVENT_SIZE_CHANGED:
             width = Int32(event.window.data1)
             height = Int32(event.window.data2)
+
+        case SDL_CONTROLLERDEVICEADDED:
+            let deviceIndex = event.cdevice.which
+            if SDL_IsGameController(deviceIndex) == SDL_TRUE {
+                if let controller = SDL_GameController(deviceIndex) {
+                    gameControllers[controller.instanceID] = controller
+                }
+            }
+            break
+
+        case SDL_CONTROLLERDEVICEREMOVED:
+            let deviceIndex = event.cdevice.which
+            let deviceID = SDL_JoystickGetDeviceInstanceID(deviceIndex)
+            if deviceID >= 0 {
+                gameControllers[deviceID] = nil
+            }
+            break
 
         case SDL_CONTROLLERBUTTONDOWN:
             if let key = dpadMap[event.controllerButton] {
