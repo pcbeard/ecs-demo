@@ -128,3 +128,48 @@ extension SDL_Event {
                 SDL_WINDOWEVENT_NONE
     }
 }
+
+extension SDL_GameControllerAxis : CustomDebugStringConvertible {
+    public var debugDescription: String {
+        String(cString: SDL_GameControllerGetStringForAxis(self))
+    }
+}
+
+extension SDL_GameControllerButton : CustomDebugStringConvertible {
+    public var debugDescription: String {
+        String(cString: SDL_GameControllerGetStringForButton(self))
+    }
+}
+
+public class SDL_GameController {
+    private let _controller : OpaquePointer
+    
+    public init?(_ index : Int32) {
+        guard let controller = SDL_GameControllerOpen(index) else { return nil }
+        _controller = controller
+    }
+    
+    deinit {
+        SDL_GameControllerClose(_controller)
+    }
+    
+    public var attached : Bool {
+        SDL_GameControllerGetAttached(_controller) == SDL_TRUE
+    }
+    
+    public var name : String {
+        String(cString: SDL_GameControllerName(_controller))
+    }
+    
+    public var instanceID : SDL_JoystickID {
+        SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(_controller))
+    }
+    
+    public var guid : SDL_JoystickGUID {
+        SDL_JoystickGetGUID(SDL_GameControllerGetJoystick(_controller))
+    }
+    
+    public var serialNumber : String? {
+        SDL_GameControllerGetSerial(_controller).flatMap(String.init(cString:))
+    }
+}
