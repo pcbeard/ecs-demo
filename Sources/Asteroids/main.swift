@@ -78,7 +78,7 @@ var keysDown = Set<Int32>()
 let isKeyDown: (Int32) -> Bool = { keysDown.contains($0) }
 // map controller D-pad buttons to arrow keys.
 extension SDL_GameControllerButton : Hashable {}
-let dpadMap : [SDL_GameControllerButton : UInt32] = [
+let dpadMap : [SDL_GameControllerButton : SDLK_RawValue] = [
     SDL_CONTROLLER_BUTTON_DPAD_UP : SDLK_UP.rawValue,
     SDL_CONTROLLER_BUTTON_DPAD_DOWN : SDLK_DOWN.rawValue,
     SDL_CONTROLLER_BUTTON_DPAD_LEFT : SDLK_LEFT.rawValue,
@@ -264,6 +264,10 @@ while quit == false {
             if let key = dpadMap[event.controllerButton] {
                 keysDown.insert(Int32(key))
             }
+            if event.controllerButton == SDL_CONTROLLER_BUTTON_START {
+                quit = true
+            }
+
         case SDL_CONTROLLERBUTTONUP:
             if let key = dpadMap[event.controllerButton] {
                 keysDown.remove(Int32(key))
