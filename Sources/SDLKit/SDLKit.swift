@@ -172,4 +172,18 @@ public class SDL_GameController {
     public var serialNumber : String? {
         SDL_GameControllerGetSerial(_controller).flatMap(String.init(cString:))
     }
+
+    public typealias Axes = (x : Int, y : Int)
+
+    public var leftJoystick : Axes {
+        let x = SDL_GameControllerGetAxis(_controller, SDL_CONTROLLER_AXIS_LEFTX)
+        let y = SDL_GameControllerGetAxis(_controller, SDL_CONTROLLER_AXIS_LEFTY)
+        return (x: Int(x), y: Int(y))
+    }
+
+    public var rightJoystick : Axes {
+        let x = SDL_GameControllerGetAxis(_controller, SDL_CONTROLLER_AXIS_RIGHTX)
+        let y = SDL_GameControllerGetAxis(_controller, SDL_CONTROLLER_AXIS_RIGHTY)
+        return (x: Int(x), y: Int(y))
+    }
 }
