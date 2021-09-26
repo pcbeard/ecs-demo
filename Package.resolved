@@ -12,19 +12,28 @@
       },
       {
         "package": "FirebladeMath",
-        "repositoryURL": "git@github.com:pcbeard/math.git",
+        "repositoryURL": "https://github.com/fireblade-engine/math.git",
         "state": {
-          "branch": "Windows",
-          "revision": "67a4ed953cc20bca3d7f5dca7f08dfc03fa71fa2",
+          "branch": "master",
+          "revision": "65aa6b5045d8dd59bc8512b87ab4ec25a18dd82d",
           "version": null
         }
       },
       {
-        "package": "SDL2",
-        "repositoryURL": "git@github.com:pcbeard/SwiftSDL2.git",
+        "package": "SDL",
+        "repositoryURL": "git@github.com:ARPGLTD/SDL.git",
         "state": {
-          "branch": "SDL_image",
-          "revision": "2c6985eea82ae115c97ad8252d978373690b24bc",
+          "branch": "SwiftPackage",
+          "revision": "bc250fbb34d435819724dff59c26ffc799a3b7d4",
+          "version": null
+        }
+      },
+      {
+        "package": "SDL_image",
+        "repositoryURL": "git@github.com:ARPGLTD/SDL_image.git",
+        "state": {
+          "branch": "SwiftPackage",
+          "revision": "5ea50b9ab73babe436103424653adbcadeda3a27",
           "version": null
         }
       }

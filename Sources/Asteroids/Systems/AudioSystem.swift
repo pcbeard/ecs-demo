@@ -7,7 +7,7 @@
 
 import Dispatch
 import FirebladeECS
-import SDL2
+import SDL
 
 class AudioSystem {
     private let queue = DispatchQueue(label: "asteroids.audio",
