@@ -84,6 +84,7 @@ final class EntityCreator {
                     left: [Int32(SDLK_LEFT.rawValue), Int32(SDLK_a.rawValue)],
                     right: [Int32(SDLK_RIGHT.rawValue), Int32(SDLK_d.rawValue)],
                     accelerate: [Int32(SDLK_UP.rawValue), Int32(SDLK_w.rawValue)],
+                    decelerate: [Int32(SDLK_DOWN.rawValue), Int32(SDLK_s.rawValue)],
                     accelerationRate: 100,
                     rotationRate: 3
                 )

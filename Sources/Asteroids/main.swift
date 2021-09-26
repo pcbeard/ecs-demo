@@ -73,18 +73,98 @@ func printHelp() {
 }
 
 // keep track of pressed and released keys by putting them in a set
-var keysDown = Set<Int32>()
+extension SDL_GameControllerAxis : Hashable {}
+
+class KeyState {
+    var presses : Int = 1
+    var axes : Set<SDL_GameControllerAxis> = []
+
+    var pressed : Bool {
+        presses > 0 || !axes.isEmpty
+    }
+}
+
+extension SDL_KeyCode : Hashable {}
+var keyStates : [SDL_KeyCode : KeyState] = [:]
+
+func pressKey(_ key : SDL_KeyCode) {
+    if let keyState = keyStates[key] {
+        keyState.presses += 1
+    } else {
+        keyStates[key] = KeyState()
+    }
+}
+
+func releaseKey(_ key : SDL_KeyCode) {
+    if let keyState = keyStates[key] {
+        keyState.presses -= 1
+    }
+}
+
 // closure to be used for checking keys down within systems
-let isKeyDown: (Int32) -> Bool = { keysDown.contains($0) }
+func isKeyPressed(_ key : Int32) -> Bool {
+    keyStates[SDL_KeyCode(rawValue: key)]?.pressed ?? false
+}
+
+// function to read joystick inputs
+func readJoysticks() -> (Vector?, Vector?) {
+    typealias Axes = SDL_GameController.Axes
+    func vector(_ axes : Axes) -> Vector? {
+        abs(axes.x) >= 3000 && abs(axes.y) >= 3000 ? Vector(Double(axes.x), Double(axes.y)) : nil
+    }
+    let leftAxes = Axes(x: (axisValues[SDL_CONTROLLER_AXIS_LEFTX] ?? 0), y: (axisValues[SDL_CONTROLLER_AXIS_LEFTY] ?? 0))
+    let rightAxes = Axes(x: (axisValues[SDL_CONTROLLER_AXIS_RIGHTX] ?? 0), y: (axisValues[SDL_CONTROLLER_AXIS_RIGHTY] ?? 0))
+    return (vector(leftAxes), vector(rightAxes))
+}
+
 // map controller D-pad buttons to arrow keys.
 extension SDL_GameControllerButton : Hashable {}
-let dpadMap : [SDL_GameControllerButton : SDLK_RawValue] = [
-    SDL_CONTROLLER_BUTTON_DPAD_UP : SDLK_UP.rawValue,
-    SDL_CONTROLLER_BUTTON_DPAD_DOWN : SDLK_DOWN.rawValue,
-    SDL_CONTROLLER_BUTTON_DPAD_LEFT : SDLK_LEFT.rawValue,
-    SDL_CONTROLLER_BUTTON_DPAD_RIGHT : SDLK_RIGHT.rawValue,
-    SDL_CONTROLLER_BUTTON_A : SDLK_SPACE.rawValue
+let controllerButtonMap: [SDL_GameControllerButton : SDL_KeyCode] = [
+    SDL_CONTROLLER_BUTTON_DPAD_UP : SDLK_UP,
+    SDL_CONTROLLER_BUTTON_DPAD_DOWN : SDLK_DOWN,
+    SDL_CONTROLLER_BUTTON_LEFTSHOULDER : SDLK_DOWN,
+    SDL_CONTROLLER_BUTTON_DPAD_LEFT : SDLK_LEFT,
+    SDL_CONTROLLER_BUTTON_DPAD_RIGHT : SDLK_RIGHT,
+    SDL_CONTROLLER_BUTTON_A : SDLK_SPACE,
+    SDL_CONTROLLER_BUTTON_B : SDLK_UP,
 ]
+
+func pressButton(_ button : SDL_GameControllerButton) {
+    if let key = controllerButtonMap[button] {
+        pressKey(key)
+    }
+}
+
+func releaseButton(_ button : SDL_GameControllerButton) {
+    if let key = controllerButtonMap[button] {
+        releaseKey(key)
+    }
+}
+
+var axisValues : [SDL_GameControllerAxis : Int] = [:]
+
+let axisMap : [SDL_GameControllerAxis : SDL_KeyCode] = [
+    SDL_CONTROLLER_AXIS_TRIGGERLEFT : SDLK_UP,
+    SDL_CONTROLLER_AXIS_TRIGGERRIGHT : SDLK_SPACE
+]
+
+func updateAxis(_ axis : SDL_GameControllerAxis, _ value : Int) {
+    axisValues[axis] = value
+    if let key = axisMap[axis] {
+        if value > 4000 {
+            if let keyState = keyStates[key] {
+                keyState.axes.insert(axis)
+            } else {
+                let keyState = KeyState()
+                keyState.axes.insert(axis)
+                keyStates[key] = keyState
+            }
+        } else {
+            keyStates[key]?.axes.remove(axis)
+        }
+    }
+}
+
 // keep track of attached game controllers.
 var gameControllers : [SDL_JoystickID : SDL_GameController] = [:]
 
@@ -152,9 +232,9 @@ let waitForStartSystem = WaitForStartSystem(creator: entityCreator, nexus: nexus
 // the next level
 let gameManager = GameManagementSystem(creator: entityCreator, config: config, nexus: nexus)
 // observes the motion related keys being pressed and moves entities accordingly
-let motionControlSystem = MotionControlSystem(isKeyDown: isKeyDown, nexus: nexus)
+let motionControlSystem = MotionControlSystem(isKeyDown: isKeyPressed, joystickAxes: readJoysticks, nexus: nexus)
 // observes the shoot key being pressed and lets shooting
-let gunControlSystem = GunControlSystem(isKeyDown: isKeyDown, creator: entityCreator, nexus: nexus)
+let gunControlSystem = GunControlSystem(isKeyDown: isKeyPressed, creator: entityCreator, nexus: nexus)
 // keeps track of how much time bullet is allowed to fly
 let bulletAgeSystem = BulletAgeSystem(creator: entityCreator, nexus: nexus)
 // responsible for how long dying action occurs also destroys entity afterwards
@@ -261,20 +341,22 @@ while quit == false {
             break
 
         case SDL_CONTROLLERBUTTONDOWN:
-            if let key = dpadMap[event.controllerButton] {
-                keysDown.insert(Int32(key))
-            }
+            pressButton(event.controllerButton)
             if event.controllerButton == SDL_CONTROLLER_BUTTON_START {
                 quit = true
             }
 
         case SDL_CONTROLLERBUTTONUP:
-            if let key = dpadMap[event.controllerButton] {
-                keysDown.remove(Int32(key))
-            }
+            releaseButton(event.controllerButton)
+
+        case SDL_CONTROLLERAXISMOTION:
+            updateAxis(event.controllerAxis, Int(event.caxis.value))
 
         case SDL_KEYDOWN:
-            keysDown.insert(event.key.keysym.sym)
+            if !event.keyRepeat {
+                pressKey(event.keyCode)
+            }
+
             switch event.keyCode {
             case SDLK_ESCAPE:
                 quit = true
@@ -284,7 +366,8 @@ while quit == false {
             }
 
         case SDL_KEYUP:
-            keysDown.remove(event.key.keysym.sym)
+            releaseKey(event.keyCode)
+
         // handle left mouse button down
         case SDL_MOUSEBUTTONDOWN where event.button.button == 1:
             push(event: .mouseDown(
