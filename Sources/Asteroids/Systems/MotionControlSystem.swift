@@ -9,6 +9,7 @@ import FirebladeECS
 import FirebladeMath
 import Foundation
 import AsteroidsGameLibrary
+import SDL
 
 let twoPi = Double.pi * 2
 
@@ -41,12 +42,12 @@ func lerpPrecise(_ v1 : Vector, _ v2 : Vector, _ t : Double) -> Vector {
 }
 
 final class MotionControlSystem {
-    private let isKeyDown: (Int32) -> Bool
+    private let isKeyDown: (SDL_KeyCode) -> Bool
     private let joystickAxes : () -> (Vector?, Vector?)
     private let motionControls: Family3<MotionControls, Position, Motion>
     private var joystickDirection : Vector?
 
-    init(isKeyDown: @escaping (Int32) -> Bool, joystickAxes : @escaping () -> (Vector?, Vector?), nexus: Nexus) {
+    init(isKeyDown: @escaping (SDL_KeyCode) -> Bool, joystickAxes : @escaping () -> (Vector?, Vector?), nexus: Nexus) {
         self.isKeyDown = isKeyDown
         self.joystickAxes = joystickAxes
         motionControls = nexus.family(requiresAll: MotionControls.self, Position.self, Motion.self)

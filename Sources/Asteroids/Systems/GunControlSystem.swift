@@ -6,13 +6,14 @@
 //
 
 import FirebladeECS
+import SDL
 
 final class GunControlSystem {
-    private let isKeyDown: (Int32) -> Bool
+    private let isKeyDown: (SDL_KeyCode) -> Bool
     private let creator: EntityCreator
     private let gunControllsFamily: Family4<Gun, GunControls, Position, Audio>
 
-    init(isKeyDown: @escaping (Int32) -> Bool, creator: EntityCreator, nexus: Nexus) {
+    init(isKeyDown: @escaping (SDL_KeyCode) -> Bool, creator: EntityCreator, nexus: Nexus) {
         self.isKeyDown = isKeyDown
         self.creator = creator
         gunControllsFamily = nexus.family(requiresAll: Gun.self, GunControls.self, Position.self, Audio.self)

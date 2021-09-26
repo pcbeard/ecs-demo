@@ -102,8 +102,8 @@ func releaseKey(_ key : SDL_KeyCode) {
 }
 
 // closure to be used for checking keys down within systems
-func isKeyPressed(_ key : Int32) -> Bool {
-    keyStates[SDL_KeyCode(rawValue: key)]?.pressed ?? false
+func isKeyPressed(_ key : SDL_KeyCode) -> Bool {
+    keyStates[key]?.pressed ?? false
 }
 
 // function to read joystick inputs

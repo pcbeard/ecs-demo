@@ -7,17 +7,18 @@
 
 import FirebladeECS
 import AsteroidsGameLibrary
+import SDL
 
 final class MotionControls: ComponentInitializable {
-    var left: Set<Int32>
-    var right: Set<Int32>
-    var accelerate: Set<Int32>
-    var decelerate: Set<Int32>
+    var left: Set<SDL_KeyCode>
+    var right: Set<SDL_KeyCode>
+    var accelerate: Set<SDL_KeyCode>
+    var decelerate: Set<SDL_KeyCode>
 
     var accelerationRate: Double
     var rotationRate: Double
 
-    init(left: Set<Int32>, right: Set<Int32>, accelerate: Set<Int32>, decelerate: Set<Int32>, accelerationRate: Double, rotationRate: Double) {
+    init(left: Set<SDL_KeyCode>, right: Set<SDL_KeyCode>, accelerate: Set<SDL_KeyCode>, decelerate: Set<SDL_KeyCode>, accelerationRate: Double, rotationRate: Double) {
         self.left = left
         self.right = right
         self.accelerate = accelerate

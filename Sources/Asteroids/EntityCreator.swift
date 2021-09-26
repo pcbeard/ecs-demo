@@ -81,16 +81,16 @@ final class EntityCreator {
             .addInstance(Motion(velocityX: 0, velocityY: 0, angularVelocity: 0, damping: 15))
             .addInstance(
                 MotionControls(
-                    left: [Int32(SDLK_LEFT.rawValue), Int32(SDLK_a.rawValue)],
-                    right: [Int32(SDLK_RIGHT.rawValue), Int32(SDLK_d.rawValue)],
-                    accelerate: [Int32(SDLK_UP.rawValue), Int32(SDLK_w.rawValue)],
-                    decelerate: [Int32(SDLK_DOWN.rawValue), Int32(SDLK_s.rawValue)],
+                    left: [SDLK_LEFT, SDLK_a],
+                    right: [SDLK_RIGHT, SDLK_d],
+                    accelerate: [SDLK_UP, SDLK_w],
+                    decelerate: [SDLK_DOWN, SDLK_s],
                     accelerationRate: 100,
                     rotationRate: 3
                 )
             )
             .addInstance(Gun(offsetX: 8, offsetY: 0, minimumShotInterval: 0.3, bulletLifetime: 2))
-            .addInstance(GunControls(trigger: Int32(SDLK_SPACE.rawValue)))
+            .addInstance(GunControls(trigger: SDLK_SPACE))
             .addInstance(Collision(radius: 9))
             .addInstance(Display(renderable: SpaceshipView()))
 
