@@ -40,14 +40,14 @@ func lerpPrecise(_ v1 : Vector, _ v2 : Vector, _ t : Double) -> Vector {
     Vector(x: lerpPrecise(v1.x, v2.x, t), y: lerpPrecise(v1.y, v2.y, t))
 }
 
-final class MotionControlSystem<ControlCode : Hashable> {
-    private let isControlActive: (ControlCode) -> Bool
+final class MotionControlSystem<InputType: Hashable> {
+    private let anyInputActive: (Set<InputType>) -> Bool
     private let joystickAxes : () -> (Vector?, Vector?)
-    private let motionControls: Family3<MotionControls<ControlCode>, Position, Motion>
+    private let motionControls: Family3<MotionControls<InputType>, Position, Motion>
     private var joystickDirection : Vector?
 
-    init(isControlActive: @escaping (ControlCode) -> Bool, joystickAxes : @escaping () -> (Vector?, Vector?), nexus: Nexus) {
-        self.isControlActive = isControlActive
+    init(anyInputActive: @escaping (Set<InputType>) -> Bool, joystickAxes : @escaping () -> (Vector?, Vector?), nexus: Nexus) {
+        self.anyInputActive = anyInputActive
         self.joystickAxes = joystickAxes
         motionControls = nexus.family(requiresAll: MotionControls.self, Position.self, Motion.self)
     }
@@ -68,21 +68,21 @@ final class MotionControlSystem<ControlCode : Hashable> {
                 }
                 position.rotation = newDirection.angle
             } else {
-                for key in control.left where isControlActive(key) {
+                if anyInputActive(control.left) {
                     position.rotation -= control.rotationRate * time
                 }
 
-                for key in control.right where isControlActive(key) {
+                if anyInputActive(control.right) {
                     position.rotation += control.rotationRate * time
                 }
             }
 
-            for key in control.accelerate where isControlActive(key) {
+            if anyInputActive(control.accelerate) {
                 motion.velocity.x += cos(position.rotation) * control.accelerationRate * time
                 motion.velocity.y += sin(position.rotation) * control.accelerationRate * time
             }
 
-            for key in control.decelerate where isControlActive(key) {
+            if anyInputActive(control.decelerate) {
                 motion.velocity.x -= cos(position.rotation) * control.accelerationRate * time
                 motion.velocity.y -= sin(position.rotation) * control.accelerationRate * time
             }

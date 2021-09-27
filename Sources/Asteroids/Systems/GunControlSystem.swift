@@ -7,20 +7,20 @@
 
 import FirebladeECS
 
-final class GunControlSystem<ControlCode : Hashable> {
-    private let isControlActive: (ControlCode) -> Bool
+final class GunControlSystem<InputType: Hashable> {
+    private let anyInputActive: (Set<InputType>) -> Bool
     private let creator: EntityCreator
-    private let gunControllsFamily: Family4<Gun, GunControls<ControlCode>, Position, Audio>
+    private let gunControllsFamily: Family4<Gun, GunControls<InputType>, Position, Audio>
 
-    init(isControlActive: @escaping (ControlCode) -> Bool, creator: EntityCreator, nexus: Nexus) {
-        self.isControlActive = isControlActive
+    init(anyInputActive: @escaping (Set<InputType>) -> Bool, creator: EntityCreator, nexus: Nexus) {
+        self.anyInputActive = anyInputActive
         self.creator = creator
         gunControllsFamily = nexus.family(requiresAll: Gun.self, GunControls.self, Position.self, Audio.self)
     }
 
     func update(time: Double) {
         for (gun, controls, position, audio) in gunControllsFamily {
-            gun.shooting = controls.triggers.first(where: isControlActive) != nil
+            gun.shooting = anyInputActive(controls.trigger)
             gun.timeSinceLastShot += time
             if gun.shooting && gun.timeSinceLastShot >= gun.minimumShotInterval {
                 creator.createBullet(gun: gun, parentPosition: position)

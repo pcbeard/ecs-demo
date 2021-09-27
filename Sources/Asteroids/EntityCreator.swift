@@ -39,11 +39,13 @@ final class EntityCreator {
         let waitEntity: Entity = nexus.createEntity()
         let waitView = WaitForStartView()
         waitEntity.assign(
-            WaitForStart(waitForStart: waitView),
+            WaitForStart<GameInput>(
+                startTrigger: Set<GameInput>(GameInput.allControlButtons + [.leftMouse]),
+                waitForStart: waitView
+            ),
             Display(renderable: waitView),
             Position(x: 0, y: 0, rotation: 0)
         )
-        waitEntity.get(component: WaitForStart.self)?.startGame = false
         return waitEntity
     }
 
@@ -107,7 +109,7 @@ final class EntityCreator {
             .addInstance(Gun(offsetX: 8, offsetY: 0, minimumShotInterval: 0.3, bulletLifetime: 2))
             .addInstance(
                 GunControls<GameInput>(
-                    triggers: [
+                    trigger: [
                         .keyCode(SDLK_SPACE),
                         .controlAxis(SDL_CONTROLLER_AXIS_TRIGGERRIGHT),
                         .controlButton(SDL_CONTROLLER_BUTTON_A)

@@ -66,8 +66,10 @@ func printHelp() {
     ← or A     rotate spaceship to the left
     → or D     rotate spaceship to the right
     ↑ or W     accelerate spaceship
+    ↓ or S     decelerate spaceship
     SPACE      shoot bullet
     ESC        quit
+    ?          help
     """
     print(help)
 }
@@ -84,9 +86,21 @@ extension SDL_GameControllerAxis : Hashable {}
 /// set will contain one of these values.
 /// 
 enum GameInput : Hashable {
-    case keyCode(SDL_KeyCode)
     case controlButton(SDL_GameControllerButton)
     case controlAxis(SDL_GameControllerAxis)
+    case keyCode(SDL_KeyCode)
+    case leftMouse
+    case rightMouse
+
+    static var allControlButtons : [GameInput] {
+        SDL_GameControllerButton.allCases.map(GameInput.controlButton)
+    }
+}
+
+extension SDL_GameControllerButton : CaseIterable {
+    public static var allCases: [SDL_GameControllerButton] {
+        (SDL_CONTROLLER_BUTTON_A.rawValue ..< SDL_CONTROLLER_BUTTON_MAX.rawValue).map(SDL_GameControllerButton.init(rawValue:))
+    }
 }
 
 var activeInputs : Set<GameInput> = []
@@ -119,8 +133,8 @@ func updateAxis(_ axis : SDL_GameControllerAxis, _ value : Int) {
 }
 
 // closure to be used for checking keys down within systems
-func isInputActive(_ input : GameInput) -> Bool {
-    activeInputs.contains(input)
+func anyInputActive(_ inputs : Set<GameInput>) -> Bool {
+    !activeInputs.isDisjoint(with: inputs)
 }
 
 // function to read joystick inputs
@@ -194,16 +208,16 @@ let scene = Renderable()
 // factory for all entites that is shared between the systems
 let entityCreator = EntityCreator(nexus: nexus, config: config)
 // responsible for laying out UI
-let layoutSystem = LayoutSystem(config: config, nexus: nexus)
+let layoutSystem = LayoutSystem<GameInput>(config: config, nexus: nexus)
 // manages when to start game
-let waitForStartSystem = WaitForStartSystem(creator: entityCreator, nexus: nexus, config: config)
+let waitForStartSystem = WaitForStartSystem<GameInput>(anyInputActive: anyInputActive, creator: entityCreator, nexus: nexus, config: config)
 // desides when spaceship is going back to the game after destruction or when to move to
 // the next level
 let gameManager = GameManagementSystem(creator: entityCreator, config: config, nexus: nexus)
 // observes the motion related keys being pressed and moves entities accordingly
-let motionControlSystem = MotionControlSystem(isControlActive: isInputActive, joystickAxes: readJoysticks, nexus: nexus)
+let motionControlSystem = MotionControlSystem(anyInputActive: anyInputActive, joystickAxes: readJoysticks, nexus: nexus)
 // observes the shoot key being pressed and lets shooting
-let gunControlSystem = GunControlSystem(isControlActive: isInputActive, creator: entityCreator, nexus: nexus)
+let gunControlSystem = GunControlSystem(anyInputActive: anyInputActive, creator: entityCreator, nexus: nexus)
 // keeps track of how much time bullet is allowed to fly
 let bulletAgeSystem = BulletAgeSystem(creator: entityCreator, nexus: nexus)
 // responsible for how long dying action occurs also destroys entity afterwards
@@ -230,7 +244,7 @@ let renderSystem = RenderSystem(window: hWin,
 let audioSystem = AudioSystem(nexus: nexus)
 
 // create intro/game over screen
-var waiter = entityCreator.createWaitForClick().get(component: WaitForStart.self)
+entityCreator.createWaitForClick()
 // create game
 entityCreator.createGame()
 
@@ -314,8 +328,6 @@ while quit == false {
             if event.controllerButton == SDL_CONTROLLER_BUTTON_START {
                 quit = true
             }
-            // can also start the game by pressing any controller button. 
-            waiter?.startGame = true
 
         case SDL_CONTROLLERBUTTONUP:
             releaseButton(event.controllerButton)
@@ -332,6 +344,9 @@ while quit == false {
             case SDLK_ESCAPE:
                 quit = true
 
+            case SDLK_QUESTION:
+                printHelp()
+
             default:
                 break
             }
@@ -341,6 +356,8 @@ while quit == false {
 
         // handle left mouse button down
         case SDL_MOUSEBUTTONDOWN where event.button.button == 1:
+            activeInputs.insert(.leftMouse)
+
             // the following seems rather inefficent
             push(event: .mouseDown(
                     position: Vector(
@@ -352,6 +369,8 @@ while quit == false {
             prevMouseDown = (x: event.button.x, y: event.button.y)
         // handle left mouse button up
         case SDL_MOUSEBUTTONUP where event.button.button == 1:
+            activeInputs.remove(.leftMouse)
+
             push(event: .mouseUp(
                     position: Vector(
                         x: Double(event.button.x),

@@ -7,15 +7,15 @@
 
 import FirebladeECS
 
-final class LayoutSystem {
+final class LayoutSystem<InputType : Hashable> {
     private let config: GameConfig
     private let huds: Family1<Hud>
-    private let waits: Family1<WaitForStart>
+    private let waits: Family1<WaitForStart<InputType>>
 
     init(config: GameConfig, nexus: Nexus) {
         self.config = config
         huds = nexus.family(requires: Hud.self)
-        waits = nexus.family(requires: WaitForStart.self)
+        waits = nexus.family(requires: WaitForStart<InputType>.self)
     }
 
     func update() {

@@ -7,14 +7,12 @@
 
 import FirebladeECS
 
-final class WaitForStart: Component {
+final class WaitForStart<InputType : Hashable>: Component {
+    var startTrigger : Set<InputType>
     var waitForStart: WaitForStartView
-    var startGame: Bool = false
 
-    init(waitForStart: WaitForStartView) {
+    init(startTrigger : Set<InputType>, waitForStart: WaitForStartView) {
+        self.startTrigger = startTrigger
         self.waitForStart = waitForStart
-        waitForStart.click = { [weak self] in
-            self?.startGame = true
-        }
     }
 }

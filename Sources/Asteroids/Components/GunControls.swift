@@ -7,14 +7,14 @@
 
 import FirebladeECS
 
-final class GunControls<ControlCode : Hashable>: ComponentInitializable {
-    var triggers: Set<ControlCode>
+final class GunControls<InputType: Hashable>: ComponentInitializable {
+    var trigger: Set<InputType>
 
-    init(triggers: Set<ControlCode>) {
-        self.triggers = triggers
+    init(trigger: Set<InputType>) {
+        self.trigger = trigger
     }
 
     required init() {
-        self.triggers = []
+        self.trigger = []
     }
 }

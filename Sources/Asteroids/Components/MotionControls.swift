@@ -8,16 +8,16 @@
 import FirebladeECS
 import AsteroidsGameLibrary
 
-final class MotionControls<ControlCode : Hashable>: ComponentInitializable {
-    var left: Set<ControlCode>
-    var right: Set<ControlCode>
-    var accelerate: Set<ControlCode>
-    var decelerate: Set<ControlCode>
+final class MotionControls<InputType: Hashable>: ComponentInitializable {
+    var left: Set<InputType>
+    var right: Set<InputType>
+    var accelerate: Set<InputType>
+    var decelerate: Set<InputType>
 
     var accelerationRate: Double
     var rotationRate: Double
 
-    init(left: Set<ControlCode>, right: Set<ControlCode>, accelerate: Set<ControlCode>, decelerate: Set<ControlCode>, accelerationRate: Double, rotationRate: Double) {
+    init(left: Set<InputType>, right: Set<InputType>, accelerate: Set<InputType>, decelerate: Set<InputType>, accelerationRate: Double, rotationRate: Double) {
         self.left = left
         self.right = right
         self.accelerate = accelerate
