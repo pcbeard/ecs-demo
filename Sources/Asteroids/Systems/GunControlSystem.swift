@@ -6,22 +6,21 @@
 //
 
 import FirebladeECS
-import SDL
 
-final class GunControlSystem {
-    private let isKeyDown: (SDL_KeyCode) -> Bool
+final class GunControlSystem<ControlCode : Hashable> {
+    private let isControlActive: (ControlCode) -> Bool
     private let creator: EntityCreator
-    private let gunControllsFamily: Family4<Gun, GunControls, Position, Audio>
+    private let gunControllsFamily: Family4<Gun, GunControls<ControlCode>, Position, Audio>
 
-    init(isKeyDown: @escaping (SDL_KeyCode) -> Bool, creator: EntityCreator, nexus: Nexus) {
-        self.isKeyDown = isKeyDown
+    init(isControlActive: @escaping (ControlCode) -> Bool, creator: EntityCreator, nexus: Nexus) {
+        self.isControlActive = isControlActive
         self.creator = creator
         gunControllsFamily = nexus.family(requiresAll: Gun.self, GunControls.self, Position.self, Audio.self)
     }
 
     func update(time: Double) {
         for (gun, controls, position, audio) in gunControllsFamily {
-            gun.shooting = isKeyDown(controls.trigger)
+            gun.shooting = controls.triggers.first(where: isControlActive) != nil
             gun.timeSinceLastShot += time
             if gun.shooting && gun.timeSinceLastShot >= gun.minimumShotInterval {
                 creator.createBullet(gun: gun, parentPosition: position)

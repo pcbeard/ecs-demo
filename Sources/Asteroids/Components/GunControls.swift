@@ -6,16 +6,15 @@
 //
 
 import FirebladeECS
-import SDL
 
-final class GunControls: ComponentInitializable {
-    var trigger: SDL_KeyCode
+final class GunControls<ControlCode : Hashable>: ComponentInitializable {
+    var triggers: Set<ControlCode>
 
-    init(trigger: SDL_KeyCode) {
-        self.trigger = trigger
+    init(triggers: Set<ControlCode>) {
+        self.triggers = triggers
     }
 
     required init() {
-        trigger = SDLK_UNKNOWN
+        self.triggers = []
     }
 }

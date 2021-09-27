@@ -9,7 +9,6 @@ import FirebladeECS
 import FirebladeMath
 import Foundation
 import AsteroidsGameLibrary
-import SDL
 
 let twoPi = Double.pi * 2
 
@@ -41,14 +40,14 @@ func lerpPrecise(_ v1 : Vector, _ v2 : Vector, _ t : Double) -> Vector {
     Vector(x: lerpPrecise(v1.x, v2.x, t), y: lerpPrecise(v1.y, v2.y, t))
 }
 
-final class MotionControlSystem {
-    private let isKeyDown: (SDL_KeyCode) -> Bool
+final class MotionControlSystem<ControlCode : Hashable> {
+    private let isControlActive: (ControlCode) -> Bool
     private let joystickAxes : () -> (Vector?, Vector?)
-    private let motionControls: Family3<MotionControls, Position, Motion>
+    private let motionControls: Family3<MotionControls<ControlCode>, Position, Motion>
     private var joystickDirection : Vector?
 
-    init(isKeyDown: @escaping (SDL_KeyCode) -> Bool, joystickAxes : @escaping () -> (Vector?, Vector?), nexus: Nexus) {
-        self.isKeyDown = isKeyDown
+    init(isControlActive: @escaping (ControlCode) -> Bool, joystickAxes : @escaping () -> (Vector?, Vector?), nexus: Nexus) {
+        self.isControlActive = isControlActive
         self.joystickAxes = joystickAxes
         motionControls = nexus.family(requiresAll: MotionControls.self, Position.self, Motion.self)
     }
@@ -69,21 +68,21 @@ final class MotionControlSystem {
                 }
                 position.rotation = newDirection.angle
             } else {
-                for key in control.left where isKeyDown(key) {
+                for key in control.left where isControlActive(key) {
                     position.rotation -= control.rotationRate * time
                 }
 
-                for key in control.right where isKeyDown(key) {
+                for key in control.right where isControlActive(key) {
                     position.rotation += control.rotationRate * time
                 }
             }
 
-            for key in control.accelerate where isKeyDown(key) {
+            for key in control.accelerate where isControlActive(key) {
                 motion.velocity.x += cos(position.rotation) * control.accelerationRate * time
                 motion.velocity.y += sin(position.rotation) * control.accelerationRate * time
             }
 
-            for key in control.decelerate where isKeyDown(key) {
+            for key in control.decelerate where isControlActive(key) {
                 motion.velocity.x -= cos(position.rotation) * control.accelerationRate * time
                 motion.velocity.y -= sin(position.rotation) * control.accelerationRate * time
             }

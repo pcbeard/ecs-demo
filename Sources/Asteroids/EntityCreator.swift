@@ -80,17 +80,40 @@ final class EntityCreator {
         fsm.createState(name: .playing)
             .addInstance(Motion(velocityX: 0, velocityY: 0, angularVelocity: 0, damping: 15))
             .addInstance(
-                MotionControls(
-                    left: [SDLK_LEFT, SDLK_a],
-                    right: [SDLK_RIGHT, SDLK_d],
-                    accelerate: [SDLK_UP, SDLK_w],
-                    decelerate: [SDLK_DOWN, SDLK_s],
+                MotionControls<GameInput>(
+                    left: [
+                        .keyCode(SDLK_LEFT), .keyCode(SDLK_a),
+                        .controlButton(SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+                    ],
+                    right: [
+                        .keyCode(SDLK_RIGHT), .keyCode(SDLK_d),
+                        .controlButton(SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+                    ],
+                    accelerate: [
+                        .keyCode(SDLK_UP), .keyCode(SDLK_w),
+                        .controlAxis(SDL_CONTROLLER_AXIS_TRIGGERLEFT),
+                        .controlButton(SDL_CONTROLLER_BUTTON_DPAD_UP),
+                        .controlButton(SDL_CONTROLLER_BUTTON_B)
+                    ],
+                    decelerate: [
+                        .keyCode(SDLK_DOWN), .keyCode(SDLK_s),
+                        .controlButton(SDL_CONTROLLER_BUTTON_DPAD_DOWN),
+                        .controlButton(SDL_CONTROLLER_BUTTON_LEFTSHOULDER),
+                    ],
                     accelerationRate: 100,
                     rotationRate: 3
                 )
             )
             .addInstance(Gun(offsetX: 8, offsetY: 0, minimumShotInterval: 0.3, bulletLifetime: 2))
-            .addInstance(GunControls(trigger: SDLK_SPACE))
+            .addInstance(
+                GunControls<GameInput>(
+                    triggers: [
+                        .keyCode(SDLK_SPACE),
+                        .controlAxis(SDL_CONTROLLER_AXIS_TRIGGERRIGHT),
+                        .controlButton(SDL_CONTROLLER_BUTTON_A)
+                    ]
+                )
+            )
             .addInstance(Collision(radius: 9))
             .addInstance(Display(renderable: SpaceshipView()))
 
