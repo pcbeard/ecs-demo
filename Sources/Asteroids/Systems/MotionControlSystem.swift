@@ -42,30 +42,23 @@ func lerpPrecise(_ v1 : Vector, _ v2 : Vector, _ t : Double) -> Vector {
 
 final class MotionControlSystem<InputType: Hashable> {
     private let anyInputActive: (Set<InputType>) -> Bool
-    private let joystickAxes : () -> (Vector?, Vector?)
+    private let readDirection: (Set<InputType>) -> Vector?
     private let motionControls: Family3<MotionControls<InputType>, Position, Motion>
-    private var joystickDirection : Vector?
 
-    init(anyInputActive: @escaping (Set<InputType>) -> Bool, joystickAxes : @escaping () -> (Vector?, Vector?), nexus: Nexus) {
+    init(anyInputActive: @escaping (Set<InputType>) -> Bool, readDirection: @escaping (Set<InputType>) -> Vector?, nexus: Nexus) {
         self.anyInputActive = anyInputActive
-        self.joystickAxes = joystickAxes
+        self.readDirection = readDirection
         motionControls = nexus.family(requiresAll: MotionControls.self, Position.self, Motion.self)
     }
 
     func update(time: Double) {
         // compute the angle of the joystick input, if any.
-        let (left, _) = joystickAxes()
-        joystickDirection = left?.normalized
-        let targetDirection = joystickDirection
-        var stillRotating = false
         for (control, position, motion) in motionControls {
-            if let targetDirection = targetDirection {
+            if let targetDirection = readDirection(control.direction) ?? control.targetDirection {
                 let rotation = position.rotation
                 let currentDirection = Vector(x: cos(rotation), y: sin(rotation))
-                let newDirection = lerpPrecise(currentDirection, targetDirection, 0.1)
-                if (!same(newDirection, targetDirection)) {
-                    stillRotating = true
-                }
+                let newDirection = lerpPrecise(currentDirection, targetDirection, 1.0 / 20)
+                control.targetDirection = !same(newDirection, targetDirection) ? targetDirection : nil
                 position.rotation = newDirection.angle
             } else {
                 if anyInputActive(control.left) {
@@ -86,10 +79,6 @@ final class MotionControlSystem<InputType: Hashable> {
                 motion.velocity.x -= cos(position.rotation) * control.accelerationRate * time
                 motion.velocity.y -= sin(position.rotation) * control.accelerationRate * time
             }
-        }
-
-        if !stillRotating {
-            joystickDirection = nil
         }
     }
 }

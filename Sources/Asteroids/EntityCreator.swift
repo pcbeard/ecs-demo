@@ -83,6 +83,10 @@ final class EntityCreator {
             .addInstance(Motion(velocityX: 0, velocityY: 0, angularVelocity: 0, damping: 15))
             .addInstance(
                 MotionControls<GameInput>(
+                    direction: [
+                        .joyStick(SDL_CONTROLLER_AXIS_LEFTX, SDL_CONTROLLER_AXIS_LEFTY, 16000),
+                        .joyStick(SDL_CONTROLLER_AXIS_RIGHTX, SDL_CONTROLLER_AXIS_RIGHTY, 16000)
+                    ],
                     left: [
                         .keyCode(SDLK_LEFT), .keyCode(SDLK_a),
                         .controlButton(SDL_CONTROLLER_BUTTON_DPAD_LEFT)

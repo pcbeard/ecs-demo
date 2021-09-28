@@ -88,6 +88,7 @@ extension SDL_GameControllerAxis : Hashable {}
 enum GameInput : Hashable {
     case controlButton(SDL_GameControllerButton)
     case controlAxis(SDL_GameControllerAxis)
+    case joyStick(SDL_GameControllerAxis, SDL_GameControllerAxis, Int)
     case keyCode(SDL_KeyCode)
     case leftMouse
     case rightMouse
@@ -137,15 +138,17 @@ func anyInputActive(_ inputs : Set<GameInput>) -> Bool {
     !activeInputs.isDisjoint(with: inputs)
 }
 
-// function to read joystick inputs
-func readJoysticks() -> (Vector?, Vector?) {
-    typealias Axes = SDL_GameController.Axes
-    func vector(_ axes : Axes) -> Vector? {
-        abs(axes.x) >= 2000 && abs(axes.y) >= 2000 ? Vector(Double(axes.x), Double(axes.y)) : nil
+/// Returns the direction of the first active joystick in the specified inputs.
+func readDirection(_ inputs : Set<GameInput>) -> Vector? {
+    for input in inputs {
+        if case .joyStick(let xAxis, let yAxis, let deadzone) = input, let xValue = axisValues[xAxis], let yValue = axisValues[yAxis] {
+            let direction = Vector(Double(xValue), Double(yValue))
+            if direction.length >= Double(deadzone) {
+                return direction
+            }
+        }
     }
-    let leftAxes = Axes(x: (axisValues[SDL_CONTROLLER_AXIS_LEFTX] ?? 0), y: (axisValues[SDL_CONTROLLER_AXIS_LEFTY] ?? 0))
-    let rightAxes = Axes(x: (axisValues[SDL_CONTROLLER_AXIS_RIGHTX] ?? 0), y: (axisValues[SDL_CONTROLLER_AXIS_RIGHTY] ?? 0))
-    return (vector(leftAxes), vector(rightAxes))
+    return nil
 }
 
 // keep track of attached game controllers.
@@ -215,7 +218,7 @@ let waitForStartSystem = WaitForStartSystem<GameInput>(anyInputActive: anyInputA
 // the next level
 let gameManager = GameManagementSystem(creator: entityCreator, config: config, nexus: nexus)
 // observes the motion related keys being pressed and moves entities accordingly
-let motionControlSystem = MotionControlSystem(anyInputActive: anyInputActive, joystickAxes: readJoysticks, nexus: nexus)
+let motionControlSystem = MotionControlSystem(anyInputActive: anyInputActive, readDirection: readDirection, nexus: nexus)
 // observes the shoot key being pressed and lets shooting
 let gunControlSystem = GunControlSystem(anyInputActive: anyInputActive, creator: entityCreator, nexus: nexus)
 // keeps track of how much time bullet is allowed to fly
@@ -333,6 +336,7 @@ while quit == false {
             releaseButton(event.controllerButton)
 
         case SDL_CONTROLLERAXISMOTION:
+            // TODO: store these .controlAxis mappings in ECS persistently.
             updateAxis(event.controllerAxis, Int(event.caxis.value))
 
         case SDL_KEYDOWN:
