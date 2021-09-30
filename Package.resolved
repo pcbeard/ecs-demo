@@ -24,16 +24,7 @@
         "repositoryURL": "git@github.com:ARPGLTD/SDL.git",
         "state": {
           "branch": "SwiftPackage",
-          "revision": "bc250fbb34d435819724dff59c26ffc799a3b7d4",
-          "version": null
-        }
-      },
-      {
-        "package": "SDL_image",
-        "repositoryURL": "git@github.com:ARPGLTD/SDL_image.git",
-        "state": {
-          "branch": "SwiftPackage",
-          "revision": "5ea50b9ab73babe436103424653adbcadeda3a27",
+          "revision": "51d1d6cf8f0bad1ab7e1f54095a6cb95dd38c6ca",
           "version": null
         }
       }
