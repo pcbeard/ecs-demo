@@ -40,8 +40,17 @@ var height: Int32 = max(displayMode.h / 2, 600)
 // flags for window to be created with
 let winFlags : SDL_WindowFlags = [
     .shown,     // make window visible
-    .resizable  // and resizable
+    .resizable, // and resizable
 ]
+
+#if os(macOS) && !DEBUG
+let platformFlags : SDL_WindowFlags = [
+    .fullScreen, .metal,
+]
+#else
+let platformFlags : SDL_WindowFlags = []
+#endif
+
 // create window
 let hWin = SDL_CreateWindow(
     windowTitle,
@@ -49,7 +58,7 @@ let hWin = SDL_CreateWindow(
     Int32(SDL_WINDOWPOS_CENTERED_MASK), // y
     width,
     height,
-    winFlags
+    winFlags.union(platformFlags)
 )
 
 // prevent game from running in case window can't be created
