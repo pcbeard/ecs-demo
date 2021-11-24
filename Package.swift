@@ -12,9 +12,9 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(name: "SDL", url: "git@github.com:ARPGLTD/SDL.git", .branch("SwiftPackage")),
+        .package(name: "SDL", url: "https://github.com/ARPGLTD/SDL.git", .branch("SwiftPackage")),
         .package(name: "FirebladeECS", url: "https://github.com/fireblade-engine/ecs.git", from: "0.17.4"),
-        .package(name: "FirebladeMath", url: "https://github.com/fireblade-engine/math.git", .branch("master"))
+        .package(name: "FirebladeMath", url: "https://github.com/pcbeard/math.git", .branch("RemoveRangeReplaceableCollection"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.

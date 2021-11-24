@@ -1,34 +1,31 @@
 {
-  "object": {
-    "pins": [
+  "object" : {
+    "pins" : [
       {
-        "package": "FirebladeECS",
-        "repositoryURL": "https://github.com/fireblade-engine/ecs.git",
-        "state": {
-          "branch": null,
-          "revision": "fd57037a6df5aa7fb8070d6af105650fb84c340c",
-          "version": "0.17.5"
+        "package" : "FirebladeECS",
+        "repositoryURL" : "https://github.com/fireblade-engine/ecs.git",
+        "state" : {
+          "revision" : "fd57037a6df5aa7fb8070d6af105650fb84c340c",
+          "version" : "0.17.5"
         }
       },
       {
-        "package": "FirebladeMath",
-        "repositoryURL": "https://github.com/fireblade-engine/math.git",
-        "state": {
-          "branch": "master",
-          "revision": "65aa6b5045d8dd59bc8512b87ab4ec25a18dd82d",
-          "version": null
+        "package" : "FirebladeMath",
+        "repositoryURL" : "https://github.com/pcbeard/math.git",
+        "state" : {
+          "branch" : "RemoveRangeReplaceableCollection",
+          "revision" : "1d7a4e042094abcc54edc948477472e7dfe92759"
         }
       },
       {
-        "package": "SDL",
-        "repositoryURL": "git@github.com:ARPGLTD/SDL.git",
-        "state": {
-          "branch": "SwiftPackage",
-          "revision": "51d1d6cf8f0bad1ab7e1f54095a6cb95dd38c6ca",
-          "version": null
+        "package" : "SDL",
+        "repositoryURL" : "https://github.com/ARPGLTD/SDL.git",
+        "state" : {
+          "branch" : "SwiftPackage",
+          "revision" : "b68db58ca0186fc92e06d798611885a576b3eb33"
         }
       }
     ]
   },
-  "version": 1
+  "version" : 1
 }
