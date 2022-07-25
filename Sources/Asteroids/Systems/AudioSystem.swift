@@ -7,6 +7,7 @@
 //
 
 import Dispatch
+import Foundation
 import FirebladeECS
 import SDL
 
@@ -21,19 +22,19 @@ struct AudioData {
 typealias MixBuffer = (count: Int, format: SDL_AudioFormat, pointer: UnsafeMutableRawPointer)
 
 struct MixCallbackData {
-    var player : MixingAudioPlayer
-    var queue : DispatchQueue
-    var buffers : [MixBuffer] = []
+    var player: MixingAudioPlayer
+    var queue: DispatchQueue
+    var buffers: [MixBuffer] = []
 }
 
 /// helper function to convert arrays or inout parameters into scoped pointers.
-@inlinable public func withPointer<R, T1>(_ p1 : UnsafePointer<T1>,
+@inlinable public func withPointer<R, T1>(_ p1: UnsafePointer<T1>,
                                           _ body: (UnsafePointer<T1>) throws -> R)
 rethrows -> R {
     try body(p1)
 }
 
-@inlinable public func withMutablePointer<R, T1>(_ p1 : UnsafeMutablePointer<T1>,
+@inlinable public func withMutablePointer<R, T1>(_ p1: UnsafeMutablePointer<T1>,
                                                  _ body: (UnsafeMutablePointer<T1>) throws -> R)
 rethrows -> R {
     try body(p1)
@@ -86,7 +87,7 @@ func mixAudioBuffers(_ data: inout MixCallbackData,
     return finished
 }
 
-func mixAudioCallback(userDataOrNil : UnsafeMutableRawPointer?,
+func mixAudioCallback(userDataOrNil: UnsafeMutableRawPointer?,
                       audioStreamOrNil: UnsafeMutablePointer<UInt8>?,
                       length : Int32)
 {
@@ -108,7 +109,7 @@ class MixingAudioPlayer {
     var device : SDL_AudioDeviceID
     var playing = false
     
-    init(_ queue : DispatchQueue, _ audioSpec : SDL_AudioSpec) {
+    init(_ queue: DispatchQueue, _ audioSpec: SDL_AudioSpec) {
         data = UnsafeMutablePointer<MixCallbackData>.allocate(capacity: 1)
         
         var want = audioSpec
@@ -137,7 +138,7 @@ class MixingAudioPlayer {
     /// that will cause clicks, so this is only ever called when the audio
     /// device is paused.
     /// - Parameter audioData:
-    func prepare(_ audioData : AudioData) {
+    func prepare(_ audioData: AudioData) {
         SDL_LockAudioDevice(device)
         data.pointee.buffers.append(
             (count: audioData.length,
@@ -227,9 +228,9 @@ class AudioSystem {
         return nil
     }
 
-    private var mixingPlayer : MixingAudioPlayer?
+    private var mixingPlayer: MixingAudioPlayer?
     
-    func getMixingPlayer(_ audioSpec : SDL_AudioSpec) -> MixingAudioPlayer? {
+    func getMixingPlayer(_ audioSpec: SDL_AudioSpec) -> MixingAudioPlayer? {
         if let player = mixingPlayer {
             return player
         }
@@ -238,14 +239,14 @@ class AudioSystem {
         return player
     }
     
-    private func play(audio audioData : AudioData) {
+    private func play(audio audioData: AudioData) {
         if let player = getMixingPlayer(audioData.spec) {
             player.prepare(audioData)
             player.start()
         }
     }
 
-    private func prepare(audio audioData : AudioData) -> Bool {
+    private func prepare(audio audioData: AudioData) -> Bool {
         getMixingPlayer(audioData.spec) != nil
     }
 
