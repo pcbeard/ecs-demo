@@ -44,11 +44,13 @@ let winFlags : SDL_WindowFlags = [
 ]
 
 #if os(macOS) && !DEBUG
-let platformFlags : SDL_WindowFlags = [
+let platformFlags: SDL_WindowFlags = [
     .fullScreen, .metal,
 ]
 #else
-let platformFlags : SDL_WindowFlags = []
+let platformFlags: SDL_WindowFlags = [
+    .fullScreen
+]
 #endif
 
 // create window
@@ -85,9 +87,9 @@ func printHelp() {
 
 // keep track of all active game inputs by putting them in a set
 
-extension SDL_KeyCode : Hashable {}
-extension SDL_GameControllerButton : Hashable {}
-extension SDL_GameControllerAxis : Hashable {}
+extension SDL_KeyCode: Hashable {}
+extension SDL_GameControllerButton: Hashable {}
+extension SDL_GameControllerAxis: Hashable {}
 
 ///
 /// All of the binary game inputs, keyboard, buttons, triggers are unified as members of
@@ -102,38 +104,38 @@ enum GameInput : Hashable {
     case leftMouse
     case rightMouse
 
-    static var allControlButtons : [GameInput] {
+    static var allControlButtons: [GameInput] {
         SDL_GameControllerButton.allCases.map(GameInput.controlButton)
     }
 }
 
-extension SDL_GameControllerButton : CaseIterable {
+extension SDL_GameControllerButton: CaseIterable {
     public static var allCases: [SDL_GameControllerButton] {
         (SDL_CONTROLLER_BUTTON_A.rawValue ..< SDL_CONTROLLER_BUTTON_MAX.rawValue).map(SDL_GameControllerButton.init(rawValue:))
     }
 }
 
-var activeInputs : Set<GameInput> = []
+var activeInputs: Set<GameInput> = []
 
-func pressKey(_ key : SDL_KeyCode) {
+func pressKey(_ key: SDL_KeyCode) {
     activeInputs.insert(.keyCode(key))
 }
 
-func releaseKey(_ key : SDL_KeyCode) {
+func releaseKey(_ key: SDL_KeyCode) {
     activeInputs.remove(.keyCode(key))
 }
 
-func pressButton(_ button : SDL_GameControllerButton) {
+func pressButton(_ button: SDL_GameControllerButton) {
     activeInputs.insert(.controlButton(button))
 }
 
-func releaseButton(_ button : SDL_GameControllerButton) {
+func releaseButton(_ button: SDL_GameControllerButton) {
     activeInputs.remove(.controlButton(button))
 }
 
-var axisValues : [SDL_GameControllerAxis : Int] = [:]
+var axisValues: [SDL_GameControllerAxis : Int] = [:]
 
-func updateAxis(_ axis : SDL_GameControllerAxis, _ value : Int) {
+func updateAxis(_ axis: SDL_GameControllerAxis, _ value: Int) {
     axisValues[axis] = value
     if value > 4000 {
         activeInputs.insert(.controlAxis(axis))
@@ -143,12 +145,12 @@ func updateAxis(_ axis : SDL_GameControllerAxis, _ value : Int) {
 }
 
 // closure to be used for checking keys down within systems
-func anyInputActive(_ inputs : Set<GameInput>) -> Bool {
+func anyInputActive(_ inputs: Set<GameInput>) -> Bool {
     !activeInputs.isDisjoint(with: inputs)
 }
 
 /// Returns the direction of the first active joystick in the specified inputs.
-func readDirection(_ inputs : Set<GameInput>) -> Vector? {
+func readDirection(_ inputs: Set<GameInput>) -> Vector? {
     for input in inputs {
         if case .joyStick(let xAxis, let yAxis, let deadzone) = input, let xValue = axisValues[xAxis], let yValue = axisValues[yAxis] {
             let direction = Vector(Double(xValue), Double(yValue))
